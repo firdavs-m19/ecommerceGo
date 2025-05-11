@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option go_package = "./proto";
+package proto;
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (OrderResponse);
+  rpc GetOrders(GetOrdersRequest) returns (OrdersResponse);
+  rpc DeleteOrder(DeleteOrderRequest) returns (DeleteOrderResponse);
+}
+
+message ProductItem {
+  string product_id = 1;
+  int32 quantity = 2;
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  repeated ProductItem products = 2;
+  double total_price = 3;
+}
+
+message GetOrderRequest {
+  string id = 1;
+}
+
+message GetOrdersRequest {}
+
+message DeleteOrderRequest {
+  string id = 1;
+}
+
+message OrderResponse {
+  string id = 1;
+  string user_id = 2;
+  repeated ProductItem products = 3;
+  double total_price = 4;
+}
+
+message OrdersResponse {
+  repeated OrderResponse orders = 1;
+}
+
+message DeleteOrderResponse {
+  string id = 1;
+  bool success = 2;
+}
