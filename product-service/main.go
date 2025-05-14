@@ -49,7 +49,6 @@ func grpcDial() *grpc.ClientConn {
 	return conn
 }
 
-// HTTP Handlers (Create, Get, List, Update, Delete)
 func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	var req pb.CreateProductRequest
 	json.NewDecoder(r.Body).Decode(&req)
@@ -104,13 +103,12 @@ func DeleteProductHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	InitMongo()
 
-	// gRPC server
-	lis, err := net.Listen("tcp", ":50052") // Use a different port than user-service
+	lis, err := net.Listen("tcp", ":50052")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
-	pb.RegisterProductServiceServer(grpcServer, &ProductServiceServer{}) // Register the gRPC service
+	pb.RegisterProductServiceServer(grpcServer, &ProductServiceServer{})
 
 	go func() {
 		log.Println("gRPC server started on port :50052")
@@ -119,7 +117,6 @@ func main() {
 		}
 	}()
 
-	// HTTP routes
 	r := mux.NewRouter()
 	r.HandleFunc("/api/products", CreateProductHandler).Methods("POST")
 	r.HandleFunc("/api/products/{id}", GetProductHandler).Methods("GET")

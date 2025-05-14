@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	pb "goFinalProject/proto/proto" // Adjust path to your pb file
+	pb "goFinalProject/proto/proto"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"

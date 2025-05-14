@@ -6,9 +6,9 @@ package proto;
 service UserService {
     rpc CreateUser(CreateUserRequest) returns (UserResponse);
     rpc GetUser(GetUserRequest) returns (UserResponse);
-    rpc GetUsers(GetUsersRequest) returns (UsersResponse);  // Get all users
-    rpc UpdateUser(UpdateUserRequest) returns (UserResponse);  // Update a user
-    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);  // Delete a user
+    rpc GetUsers(GetUsersRequest) returns (UsersResponse); 
+    rpc UpdateUser(UpdateUserRequest) returns (UserResponse); 
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
 }
 
 message CreateUserRequest {
@@ -25,7 +25,6 @@ message GetUserRequest {
 }
 
 message GetUsersRequest {
-    // Any filters you want for the list of users, leave empty for all users
 }
 
 message UserResponse {

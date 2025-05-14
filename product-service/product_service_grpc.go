@@ -150,8 +150,7 @@ func (s *ProductServiceServer) UpdateProduct(ctx context.Context, req *pb.Update
 		Stock:       req.Stock,
 		Images:      req.Images,
 		IsAvailable: req.IsAvailable,
-		// created_at left out since we don't change it here
-		UpdatedAt: time.Now().Format(time.RFC3339),
+		UpdatedAt:   time.Now().Format(time.RFC3339),
 	}, nil
 }
 

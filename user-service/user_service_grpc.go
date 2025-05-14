@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	pb "goFinalProject/proto/proto" // Adjust path to your pb file
+	pb "goFinalProject/proto/proto"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -12,14 +12,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// UserServiceServer implements the UserServiceServer interface
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
 }
 
-// CreateUser method implementation
 func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
-	// Check for duplicate email
 	emailCount, err := userCollection.CountDocuments(ctx, bson.M{"email": req.Email})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error checking email uniqueness: %v", err)
@@ -28,7 +25,6 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 		return nil, status.Errorf(codes.AlreadyExists, "Email already in use")
 	}
 
-	// Check for duplicate username
 	usernameCount, err := userCollection.CountDocuments(ctx, bson.M{"username": req.Username})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error checking username uniqueness: %v", err)
@@ -37,7 +33,6 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 		return nil, status.Errorf(codes.AlreadyExists, "Username already in use")
 	}
 
-	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to hash password: %v", err)
@@ -45,7 +40,6 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 
 	now := time.Now()
 
-	// Prepare the user document
 	user := bson.M{
 		"name":      req.Name,
 		"username":  req.Username,
@@ -64,7 +58,6 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 
 	oid := res.InsertedID.(primitive.ObjectID)
 
-	// Return the created user response
 	return &pb.UserResponse{
 		Id:        oid.Hex(),
 		Name:      req.Name,
@@ -77,7 +70,6 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 	}, nil
 }
 
-// GetUser method implementation
 func (s *UserServiceServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UserResponse, error) {
 	oid, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
@@ -104,7 +96,6 @@ func (s *UserServiceServer) GetUser(ctx context.Context, req *pb.GetUserRequest)
 	}, nil
 }
 
-// GetUsers method implementation
 func (s *UserServiceServer) GetUsers(ctx context.Context, req *pb.GetUsersRequest) (*pb.UsersResponse, error) {
 	cursor, err := userCollection.Find(ctx, bson.M{})
 	if err != nil {
@@ -136,7 +127,6 @@ func (s *UserServiceServer) GetUsers(ctx context.Context, req *pb.GetUsersReques
 	}, nil
 }
 
-// UpdateUser method implementation
 func (s *UserServiceServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
 	oid, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
@@ -162,7 +152,6 @@ func (s *UserServiceServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRe
 	}, nil
 }
 
-// DeleteUser method implementation
 func (s *UserServiceServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
 	oid, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {

@@ -14,7 +14,6 @@ type OrderServiceServer struct {
 }
 
 func (s *OrderServiceServer) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (*pb.OrderResponse, error) {
-	// Convert pb.ProductItem to BSON format
 	var productDocs []bson.M
 	for _, item := range req.Products {
 		productDocs = append(productDocs, bson.M{
@@ -36,7 +35,6 @@ func (s *OrderServiceServer) CreateOrder(ctx context.Context, req *pb.CreateOrde
 
 	oid := res.InsertedID.(primitive.ObjectID)
 
-	// Convert back to gRPC response
 	var grpcProducts []*pb.ProductItem
 	for _, item := range req.Products {
 		grpcProducts = append(grpcProducts, &pb.ProductItem{
@@ -102,7 +100,6 @@ func (s *OrderServiceServer) GetOrders(ctx context.Context, req *pb.GetOrdersReq
 		userId := order["user_id"].(string)
 		totalPrice := order["total_price"].(float64)
 
-		// Convert products from BSON to []*pb.ProductItem
 		var grpcProducts []*pb.ProductItem
 		if rawProducts, ok := order["products"].(primitive.A); ok {
 			for _, p := range rawProducts {
