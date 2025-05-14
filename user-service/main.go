@@ -97,6 +97,11 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get ID from URL and set it in the request
+	params := mux.Vars(r)
+	userID := params["id"]
+	userReq.Id = userID
+
 	grpcClient := pb.NewUserServiceClient(grpcDial())
 	resp, err := grpcClient.UpdateUser(context.Background(), &userReq)
 	if err != nil {

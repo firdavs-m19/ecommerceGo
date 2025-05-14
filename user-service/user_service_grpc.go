@@ -130,25 +130,60 @@ func (s *UserServiceServer) GetUsers(ctx context.Context, req *pb.GetUsersReques
 func (s *UserServiceServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
 	oid, err := primitive.ObjectIDFromHex(req.Id)
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.InvalidArgument, "Invalid ObjectID: %v", err)
 	}
 
-	update := bson.M{
-		"$set": bson.M{
-			"name":  req.Name,
-			"email": req.Email,
-		},
+	updateFields := bson.M{}
+
+	if req.Name != "" {
+		updateFields["name"] = req.Name
 	}
+	if req.Email != "" {
+		updateFields["email"] = req.Email
+	}
+	if req.Username != "" {
+		count, err := userCollection.CountDocuments(ctx, bson.M{"username": req.Username, "_id": bson.M{"$ne": oid}})
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "Error checking username uniqueness: %v", err)
+		}
+		if count > 0 {
+			return nil, status.Errorf(codes.AlreadyExists, "Username already in use")
+		}
+		updateFields["username"] = req.Username
+	}
+	if req.Phone != "" {
+		updateFields["phone"] = req.Phone
+	}
+
+	if len(updateFields) == 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "No fields to update")
+	}
+
+	updateFields["updatedAt"] = time.Now()
+
+	update := bson.M{"$set": updateFields}
 
 	_, err = userCollection.UpdateOne(ctx, bson.M{"_id": oid}, update)
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.Internal, "Failed to update user: %v", err)
+	}
+
+	// Fetch updated user
+	var updatedUser bson.M
+	err = userCollection.FindOne(ctx, bson.M{"_id": oid}).Decode(&updatedUser)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to fetch updated user: %v", err)
 	}
 
 	return &pb.UserResponse{
-		Id:    oid.Hex(),
-		Name:  req.Name,
-		Email: req.Email,
+		Id:        oid.Hex(),
+		Name:      updatedUser["name"].(string),
+		Username:  updatedUser["username"].(string),
+		Email:     updatedUser["email"].(string),
+		Phone:     updatedUser["phone"].(string),
+		Role:      updatedUser["role"].(string),
+		CreatedAt: updatedUser["createdAt"].(primitive.DateTime).Time().Format(time.RFC3339),
+		UpdatedAt: updatedUser["updatedAt"].(primitive.DateTime).Time().Format(time.RFC3339),
 	}, nil
 }
 

@@ -82,6 +82,9 @@ func GetProductsHandler(w http.ResponseWriter, r *http.Request) {
 func UpdateProductHandler(w http.ResponseWriter, r *http.Request) {
 	var req pb.UpdateProductRequest
 	json.NewDecoder(r.Body).Decode(&req)
+
+	req.Id = mux.Vars(r)["id"]
+
 	resp, err := pb.NewProductServiceClient(grpcDial()).UpdateProduct(context.Background(), &req)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
